@@ -30,6 +30,17 @@ def getTrains(request):
     ))
     return JsonResponse(sorted_data, safe=False)
 
+@api_view(['GET'])
+def getSpecificTrain(request, trainNo):
+    authorization = request.headers.get('Authorization')
+    url = f'http://20.244.56.144/train/trains/{trainNo}'
+    headers = {
+        "Authorization" : authorization
+    }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+    return JsonResponse(data=data, safe=False)
 
 def is_departing_soon(departure_time, current_time):
     departure = datetime.time(departure_time['Hours'], departure_time['Minutes'], departure_time['Seconds'])
