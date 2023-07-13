@@ -15,10 +15,20 @@ def getTrains(request):
 
     response = requests.get(url, headers=headers)
     data = response.json()
-    
-    filter_data = [train for train in data if not is_departing_soon(train['departureTime'], current_time)]
+    current_time = datetime.datetime.now().time()
+    # filtering train hich are not departing in next 30 minutes
+    filtered_data = [train for train in data if not is_departing_soon(train['departureTime'], current_time)]
 
-    return JsonResponse(data, safe=False)
+    # sortinf filtering data
+    sorted_data = sorted(filtered_data, key=lambda nd:(
+        nd['price']['AC'],
+        nd['price']['sleeper'],
+        -nd['seatsAvailable']['AC'],
+        -nd['seatsAvailable']['sleeper'],
+        -nd['departureTime']['Hours'],
+        -(nd['departureTime']['Minutes'] - nd['delayedBy'])
+    ))
+    return JsonResponse(sorted_data, safe=False)
 
 
 def is_departing_soon(departure_time, current_time):
